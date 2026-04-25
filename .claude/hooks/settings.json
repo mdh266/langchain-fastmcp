@@ -1,0 +1,20 @@
+{                                                                                     
+    "hooks": {                                                                          
+      "after": {                                                                        
+        "write": [                                                                      
+          {                                                                             
+            "command": "ruff . --fix",                                                  
+            "description": "Run Ruff linter/fixer on the whole repo after each code write"                                                                                
+          }                                                                             
+        ]                                                                               
+      }                                                                                 
+    },                                                                                  
+    // optional: give the hook permission to run `ruff` without prompting               
+    "allow": [                                                                          
+      {                                                                                 
+        "command": "ruff",                                                              
+        "reason": "Auto‑formatting after Claude writes code"                            
+      }                                                                                 
+    ]                                                                                   
+}                                                                                     
+                         

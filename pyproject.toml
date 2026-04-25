@@ -1,0 +1,12 @@
+[project]
+name = "mcpweather"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "fastmcp>=3.2.4",
+    "pydantic>=2.13.3",
+    "pydotenv>=0.0.7",
+    "ruff>=0.15.12",
+]
