@@ -5,12 +5,11 @@ import urllib.request
 from typing import Any, Dict, Optional
 from fastmcp import FastMCP
 from dotenv import load_dotenv
-import os
 from typing import Dict, Optional
 import googlemaps
-import pandas as pd
-import geopandas as gpd
-from shapely.geometry import Point
+import redis
+from pymongo import MongoClient
+from pymongo.server_api import ServerApi
 
 
 load_dotenv()  # Load environment variables from .env file
@@ -85,7 +84,7 @@ def convert_address_to_point(address: str ) -> Dict[str, float]:
 
 
 @mcp.tool()
-def get_police_precinct(lat_longs: Dict[str, float]) -> int:
+def get_police_precinct(point: Dict[str, float]) -> int:
     """
     Resolve a street address to the NYPD precinct number.
 
@@ -94,7 +93,7 @@ def get_police_precinct(lat_longs: Dict[str, float]) -> int:
 
     Parameters
     ----------
-    lat_longs: Dict[str, float]
+    point: Dict[str, float]
         A dictionary containing the latitude and longitude of the location.
 
     Returns
@@ -109,10 +108,32 @@ def get_police_precinct(lat_longs: Dict[str, float]) -> int:
     >> get_police_precinct({"lat": 40.748817, "lng": -73.985428})
     19
     """
-    df = gpd.read_parquet("NYPD_Sectors_20260507.parquet")
-    geo_point = Point(lat_longs.get("lng"), lat_longs.get("lat"))
-    precinct = df[df["geometry"].contains(geo_point)][["pct", "sector"]]
-    return int(precinct.iloc[0]["pct"]) if not precinct.empty else None
+    mongo_username = os.getenv("MONGO_USERNAME")
+    mongo_password = os.getenv("MONGO_PASSWORD")
+    cluster_address = os.getenv("MONGO_HOST")
+
+    client = MongoClient(
+            f"mongodb+srv://{mongo_username}:{mongo_password}@{cluster_address}",
+            server_api=ServerApi('1')
+    )
+
+    query = {"geometry": { 
+            "$geoIntersects": { 
+                "$geometry": { 
+                "type": "Point", 
+                "coordinates": [ point.get("lng"), point.get("lat")]
+                            } 
+                    } 
+            } 
+    } 
+
+    projection = {"_id":0, "precinct_number":1}
+
+    precinct_info =  (client.get_database("precincts")
+                            .get_collection("nyc")
+                            .find_one(query, projection))
+
+    return int(precinct_info["precinct_number"]) if precinct_info else None
 
 
 @mcp.tool()
@@ -130,15 +151,23 @@ def get_precinct_info(precinct_number: int) -> Dict[str, str]:
     dict
         A dictionary containing the precinct information (e.g. name, address, etc.).
         Returns an empty dictionary if the pre
-    df = pd.read_parquet("precinct_info.parquet")
-    precinct_info = df[df["precinct_number"] == precinct_number].to_dict(orient="records")
-    return precinct_info[0] if precinct_info else {}
-cinct number is not found.
+  
     """
-    df = pd.read_parquet("precinct_info.parquet")
-    precinct_info = df[df["precinct_number"] == precinct_number].to_dict(orient="records")
-    return precinct_info[0] if precinct_info else {}
+    r = redis.Redis(
+        host=os.getenv("REDIS_HOST"),
+        port=11170,
+        decode_responses=True,
+        username=os.getenv("REDIS_USERNAME"),
+        password=os.getenv("REDIS_PASSWORD")
+    )
+    try:
+        result = r.get(str(precinct_number))
+        if result:
+            return json.loads(result)
+    except Exception as e:
+        print(f"Error fetching precinct info for {precinct_number}: {e}")
 
+    return {}  # Return an empty dict if no info is found
 
 if __name__ == "__main__":
     mcp.run(transport="http", port=8000)

@@ -14,5 +14,6 @@ dependencies = [
     "langchain-mcp-adapters>=0.2.2",
     "pyarrow>=24.0.0",
     "pydotenv>=0.0.7",
+    "redis>=8.1.0",
     "ruff>=0.15.12",
 ]
