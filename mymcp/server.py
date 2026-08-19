@@ -8,14 +8,32 @@ from dotenv import load_dotenv
 from typing import Dict, Optional
 import googlemaps
 import redis
+import os
 from pymongo import MongoClient
 from pymongo.server_api import ServerApi
-
 
 load_dotenv()  # Load environment variables from .env file
 
 # Create the FastMCP server
 mcp = FastMCP("all-server")
+
+
+def get_mongo_client() -> MongoClient:
+    """
+    Build a MongoClient using the credentials stored in .env.
+    Returns a client connected to the `nyc` database (the same DB used by
+    the precinct‑ingestion code).
+    """
+    mongo_username = os.getenv("MONGO_USERNAME")
+    mongo_password = os.getenv("MONGO_PASSWORD")
+    mongo_host = os.getenv("MONGO_HOST")
+
+    # Example URI format used elsewhere in the project:
+    #   mongodb+srv://<username>:<password>@<host>
+    uri = f"mongodb+srv://{mongo_username}:{mongo_password}@{mongo_host}"
+    print(f"Connecting to MongoDB @ {uri}")   # optional sanity‑check
+
+    return MongoClient(uri, server_api=ServerApi("1"))
 
 
 @mcp.tool()
@@ -83,8 +101,23 @@ def convert_address_to_point(address: str ) -> Dict[str, float]:
     return point
 
 
-@mcp.tool()
-def get_police_precinct(point: Dict[str, float]) -> int:
+@mcp.tool(
+      name="get_police_precinct",
+      description="Resolve a street address to the NYPD precinct number.",
+      output_schema={                 # allow integer **or** null
+          "type": "object",
+          "properties": {
+              "result": {
+                  "anyOf": [
+                      {"type": "integer"},
+                      {"type": "null"}
+                  ]
+              }
+          },
+          "required": ["result"]
+      }
+)
+def get_police_precinct(point: Dict[str, float]) -> int | None:
     """
     Resolve a street address to the NYPD precinct number.
 
@@ -108,14 +141,7 @@ def get_police_precinct(point: Dict[str, float]) -> int:
     >> get_police_precinct({"lat": 40.748817, "lng": -73.985428})
     19
     """
-    mongo_username = os.getenv("MONGO_USERNAME")
-    mongo_password = os.getenv("MONGO_PASSWORD")
-    cluster_address = os.getenv("MONGO_HOST")
-
-    client = MongoClient(
-            f"mongodb+srv://{mongo_username}:{mongo_password}@{cluster_address}",
-            server_api=ServerApi('1')
-    )
+    client = get_mongo_client()
 
     query = {"geometry": { 
             "$geoIntersects": { 
@@ -133,10 +159,73 @@ def get_police_precinct(point: Dict[str, float]) -> int:
                             .get_collection("nyc")
                             .find_one(query, projection))
 
-    return int(precinct_info["precinct_number"]) if precinct_info else None
+    return int(precinct_info.get("precinct_number")) if precinct_info else None
 
 
-@mcp.tool()
+@mcp.tool(
+    name="find_closest_restroom",
+    description="Find the closest public restroom to a given point and all information on it",
+    output_schema={  # a free‑form schema – essentially “anything”
+    "type": "object",
+    "additionalProperties": True,
+})
+def find_closest_restroom(point: Dict[str, float]) -> Dict[str, Any]:
+    """
+    Find the closest public restroom to a given point.
+
+    Parameters
+    ----------
+    point: Dict[str, float]
+    
+        A dictionary containing the latitude and longitude of the location to search from.
+
+    Returns
+    -------
+    dict
+        A dictionary containing the information of the closest restroom.
+        Returns an empty dictionary if no restrooms are found.
+    """
+    client = get_mongo_client()
+    collection = client.get_database("nyc").get_collection("bathrooms")
+    pipeline = [
+        {
+            "$geoNear": {
+                "near": {"type": "Point", "coordinates": [point.get("lng"), point.get("lat")]},
+                "distanceField": "calculated_distance",
+                "spherical": True,
+                "key": "geom"
+            }
+        },
+        {"$limit": 1}
+    ]
+
+    results = list(collection.aggregate(pipeline))
+    values = {}
+    if len(results) > 0: 
+        # Copy a predefined set of fields from the Mongo result into the response dict
+        _fields = [
+            "facility_name",
+            "location_type",
+            "operator",
+            "status",
+            "open",
+            "hours_of_operation",
+            "accessibility",
+            "restroom_type",
+            "changing_stations",
+            "latitude",
+            "longitude",
+        ]
+        for _k in _fields:
+            values[_k] = results[0].get(_k)
+        values["website"] = results[0].get("website").get("url")
+    return values
+    
+
+@mcp.tool(
+    name="get_precinct_info",
+    description="Return the precinct information for a given precinct number."
+)
 def get_precinct_info(precinct_number: int) -> Dict[str, str]:
     """
     Return the precinct information for a given precinct number.
