@@ -1,0 +1,14 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug myMCP Server",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/mymcp/server.py",
+            "justMyCode": true,
+            "envFile": "${workspaceFolder}/.env",
+            "console": "integratedTerminal"
+        }
+    ]
+}

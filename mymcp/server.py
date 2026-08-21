@@ -4,36 +4,17 @@ import urllib.parse
 import urllib.request
 from typing import Any, Dict, Optional
 from fastmcp import FastMCP
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 from typing import Dict, Optional
 import googlemaps
 import redis
-import os
-from pymongo import MongoClient
-from pymongo.server_api import ServerApi
+from utils import get_mongo_client
 
-load_dotenv()  # Load environment variables from .env file
+
+load_dotenv(find_dotenv())  # Load environment variables from .env file
 
 # Create the FastMCP server
 mcp = FastMCP("all-server")
-
-
-def get_mongo_client() -> MongoClient:
-    """
-    Build a MongoClient using the credentials stored in .env.
-    Returns a client connected to the `nyc` database (the same DB used by
-    the precinct‑ingestion code).
-    """
-    mongo_username = os.getenv("MONGO_USERNAME")
-    mongo_password = os.getenv("MONGO_PASSWORD")
-    mongo_host = os.getenv("MONGO_HOST")
-
-    # Example URI format used elsewhere in the project:
-    #   mongodb+srv://<username>:<password>@<host>
-    uri = f"mongodb+srv://{mongo_username}:{mongo_password}@{mongo_host}"
-    print(f"Connecting to MongoDB @ {uri}")   # optional sanity‑check
-
-    return MongoClient(uri, server_api=ServerApi("1"))
 
 
 @mcp.tool()
@@ -103,19 +84,7 @@ def convert_address_to_point(address: str ) -> Dict[str, float]:
 
 @mcp.tool(
       name="get_police_precinct",
-      description="Resolve a street address to the NYPD precinct number.",
-      output_schema={                 # allow integer **or** null
-          "type": "object",
-          "properties": {
-              "result": {
-                  "anyOf": [
-                      {"type": "integer"},
-                      {"type": "null"}
-                  ]
-              }
-          },
-          "required": ["result"]
-      }
+      description="Resolve a street address to the NYPD precinct number."
 )
 def get_police_precinct(point: Dict[str, float]) -> int | None:
     """
@@ -143,7 +112,7 @@ def get_police_precinct(point: Dict[str, float]) -> int | None:
     """
     client = get_mongo_client()
 
-    query = {"geometry": { 
+    query = {"geom": { 
             "$geoIntersects": { 
                 "$geometry": { 
                 "type": "Point", 
@@ -155,8 +124,8 @@ def get_police_precinct(point: Dict[str, float]) -> int | None:
 
     projection = {"_id":0, "precinct_number":1}
 
-    precinct_info =  (client.get_database("precincts")
-                            .get_collection("nyc")
+    precinct_info =  (client.get_database("nyc")
+                            .get_collection("precincts")
                             .find_one(query, projection))
 
     return int(precinct_info.get("precinct_number")) if precinct_info else None
@@ -186,7 +155,7 @@ def find_closest_restroom(point: Dict[str, float]) -> Dict[str, Any]:
         Returns an empty dictionary if no restrooms are found.
     """
     client = get_mongo_client()
-    collection = client.get_database("nyc").get_collection("bathrooms")
+    collection = client.get_database("nyc").get_collection("restrooms")
     pipeline = [
         {
             "$geoNear": {
