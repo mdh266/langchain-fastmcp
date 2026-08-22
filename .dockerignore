@@ -1,0 +1,19 @@
+# Docker ignore file for the mymcp container
+# -------------------------------------------------
+# Secrets / credentials
+.env
+
+# Local development artefacts
+*.pyc
+__pycache__/
+.venv/
+.uv/
+.uvx/
+.ipynb_checkpoints/
+
+# Git metadata
+.git
+.gitignore
+
+# Miscellaneous system files
+.DS_Store

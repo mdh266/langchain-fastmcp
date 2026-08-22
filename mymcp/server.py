@@ -228,4 +228,4 @@ def get_precinct_info(precinct_number: int) -> Dict[str, str]:
     return {}  # Return an empty dict if no info is found
 
 if __name__ == "__main__":
-    mcp.run(transport="http", port=8000)
+    mcp.run(transport="http", host="0.0.0.0", port=8080)
