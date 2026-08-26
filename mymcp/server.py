@@ -86,7 +86,7 @@ def convert_address_to_point(address: str ) -> Dict[str, float]:
       name="get_police_precinct",
       description="Resolve a street address to the NYPD precinct number."
 )
-def get_police_precinct(point: Dict[str, float]) -> int | None:
+def get_police_precinct(lat: float, lng: float) -> int | None:
     """
     Resolve a street address to the NYPD precinct number.
 
@@ -95,8 +95,10 @@ def get_police_precinct(point: Dict[str, float]) -> int | None:
 
     Parameters
     ----------
-    point: Dict[str, float]
-        A dictionary containing the latitude and longitude of the location.
+    lat: float
+        Latitude of the location.
+    lng: float
+        Longitude of the location.
 
     Returns
     -------
@@ -107,7 +109,7 @@ def get_police_precinct(point: Dict[str, float]) -> int | None:
 
     Example
     -------
-    >> get_police_precinct({"lat": 40.748817, "lng": -73.985428})
+    >> get_police_precinct(40.748817, -73.985428)
     19
     """
     client = get_mongo_client()
@@ -116,7 +118,7 @@ def get_police_precinct(point: Dict[str, float]) -> int | None:
             "$geoIntersects": { 
                 "$geometry": { 
                 "type": "Point", 
-                "coordinates": [ point.get("lng"), point.get("lat")]
+                "coordinates": [ lng, lat]
                             } 
                     } 
             } 
@@ -133,20 +135,21 @@ def get_police_precinct(point: Dict[str, float]) -> int | None:
 
 @mcp.tool(
     name="find_closest_restroom",
-    description="Find the closest public restroom to a given point and all information on it",
+    description="Find the closest public restroom to a given latitude and longitude and return all information on it",
     output_schema={  # a free‑form schema – essentially “anything”
     "type": "object",
     "additionalProperties": True,
 })
-def find_closest_restroom(point: Dict[str, float]) -> Dict[str, Any]:
+def find_closest_restroom(lat: float, lng: float) -> Dict[str, Any]:
     """
-    Find the closest public restroom to a given point.
+    Find the closest public restroom to the provided latitude and longitude.
 
     Parameters
     ----------
-    point: Dict[str, float]
-    
-        A dictionary containing the latitude and longitude of the location to search from.
+    lat: float
+        Latitude of the location to search from.
+    lng: float
+        Longitude of the location to search from.
 
     Returns
     -------
@@ -159,7 +162,7 @@ def find_closest_restroom(point: Dict[str, float]) -> Dict[str, Any]:
     pipeline = [
         {
             "$geoNear": {
-                "near": {"type": "Point", "coordinates": [point.get("lng"), point.get("lat")]},
+                "near": {"type": "Point", "coordinates": [lng, lat]},
                 "distanceField": "calculated_distance",
                 "spherical": True,
                 "key": "geom"
@@ -170,7 +173,7 @@ def find_closest_restroom(point: Dict[str, float]) -> Dict[str, Any]:
 
     results = list(collection.aggregate(pipeline))
     values = {}
-    if len(results) > 0: 
+    if len(results) > 0:
         # Copy a predefined set of fields from the Mongo result into the response dict
         _fields = [
             "facility_name",
@@ -187,7 +190,13 @@ def find_closest_restroom(point: Dict[str, float]) -> Dict[str, Any]:
         ]
         for _k in _fields:
             values[_k] = results[0].get(_k)
-        values["website"] = results[0].get("website").get("url")
+        website_val = results[0].get("website")
+        if isinstance(website_val, dict):
+            values["website"] = website_val.get("url")
+        else:
+            # If website field is not a dict (e.g., missing or unexpected type), store as is or omit
+            if website_val is not None:
+                values["website"] = website_val
     return values
     
 
