@@ -5,8 +5,6 @@ env:
   DOCKER_IMAGE: mdh266/agentsmcp
   TAG: cloud
 
-
-
 on:
   push:
     branches:
@@ -31,5 +29,6 @@ jobs:
 
       - name: Build & Push Docker
         run: | 
-          docker build -t ${{ env.DOCKER_IMAGE }}:${{ env.TAG }}  .
+          docker build -f mymcp/Dockerfile\
+                       -t ${{ env.DOCKER_IMAGE }}:${{ env.TAG }}  .
           docker push ${{ env.DOCKER_IMAGE }}:${{ env.TAG }}  
