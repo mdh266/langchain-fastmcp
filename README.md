@@ -6,9 +6,11 @@ In this post I will talk about Agents, Tools, MCPs and All That (the title being
 
 I'll go over how to buid a simple agent, use a [MCP](https://en.wikipedia.org/wiki/Model_Context_Protocol) server and observe agent behavoir; all using [LangChain](https://www.langchain.com/), [Groq](https://groq.com/), [FastMCP](https://gofastmcp.com/getting-started/welcome) and [LangSmith](https://www.langchain.com/langsmith-platform). The agent will be a simple ReAct agent. It will have tools that can help us find weather (like everyones first agent), but also help find the closest Police station and public restroom in NYC (data coming from [OpenData NYC](https://data.cityofnewyork.us/)). Very helpful things! In the back end, I'll use [MongoDB](https://www.mongodb.com/), [Redis](https://redis.io/) along with a handful of APIs to accompish these tasks.
 
+Locally running:
 
 ```bash
 docker build -f mymcyp/Dockerfile -t agentsmymcp 
+docker run -ip 8080:8080 -t agentsmymcp
 ```
 ## Part 2
 
