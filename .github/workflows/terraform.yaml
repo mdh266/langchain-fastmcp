@@ -17,6 +17,7 @@ jobs:
         env:
             OPEN_WEATHER_MAP_API_KEY: ${{ secrets.OPEN_WEATHER_MAP_API_KEY }}
             GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+            TF_VAR_project_id: ${{ secrets.project_id }}
         steps:
         - name: Checkout repository
           uses: actions/checkout@v3
@@ -51,7 +52,7 @@ jobs:
         env:
             OPEN_WEATHER_MAP_API_KEY: ${{ secrets.OPEN_WEATHER_MAP_API_KEY }}
             GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
-            
+
         steps:
         - name: Checkout repository
           uses: actions/checkout@v4

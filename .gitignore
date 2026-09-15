@@ -14,6 +14,5 @@ wheels/
 *.DS_Store
 
 *terraform.tfvars
-*.tfvars
 *.terraform*
 *.tfstate*
