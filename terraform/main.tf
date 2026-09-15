@@ -26,7 +26,7 @@ resource "google_cloud_run_service" "mcp_service" {
         resources {
           limits = {
             cpu    = "1"
-            memory = "512Mi"
+            memory = "256Mi"
           }
         }
       }
