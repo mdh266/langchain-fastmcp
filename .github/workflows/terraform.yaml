@@ -23,22 +23,15 @@ jobs:
         - name: Checkout repository
           uses: actions/checkout@v3
 
-        - name: Write GCP service‑account key
-          run: |
-            # GitHub masks the secret value in the logs automatically
-            echo "${{ secrets.GCP_SA_KEY }}" > $HOME/gcp-key.json
-            # Export the path for Terraform’s ADC lookup
-            echo "GOOGLE_APPLICATION_CREDENTIALS=$HOME/gcp-key.json" >> $GITHUB_ENV
-
-        - name: Cache Terraform plugins & modules
-          uses: actions/cache@v4
-          with:
-            path: |
-              .terraform
-              .terraform.lock.hcl
-            key: ${{ runner.os }}-terraform-${{ hashFiles('terraform/**/*.tf') }}
-            restore-keys: |
-               ${{ runner.os }}-terraform-
+        # - name: Cache Terraform plugins & modules
+        #   uses: actions/cache@v4
+        #   with:
+        #     path: |
+        #       .terraform
+        #       .terraform.lock.hcl
+        #     key: ${{ runner.os }}-terraform-${{ hashFiles('terraform/**/*.tf') }}
+        #     restore-keys: |
+        #        ${{ runner.os }}-terraform-
 
 
         - name: Set up Terraform
@@ -46,6 +39,11 @@ jobs:
           with:
             terraform_version: 1.15.3
     
+        - name: Write GCP service‑account key (same as in plan job)
+          run: |
+            echo "${{ secrets.GCP_SA_KEY }}" > $HOME/gcp-key.json
+            echo "GOOGLE_APPLICATION_CREDENTIALS=$HOME/gcp-key.json" >> $GITHUB_ENV
+
         - name: Terraform Init
           run: terraform init -input=false
     
@@ -87,6 +85,11 @@ jobs:
           with:
             terraform_version: 1.15.3
         
+        - name: Write GCP service‑account key (same as in plan job)
+          run: |
+            echo "${{ secrets.GCP_SA_KEY }}" > $HOME/gcp-key.json
+            echo "GOOGLE_APPLICATION_CREDENTIALS=$HOME/gcp-key.json" >> $GITHUB_ENV
+
         - name: Download Terraform plan artifact
           uses: actions/download-artifact@v4
           with:
