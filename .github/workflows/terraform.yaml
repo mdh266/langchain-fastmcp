@@ -22,7 +22,13 @@ jobs:
         steps:
         - name: Checkout repository
           uses: actions/checkout@v3
-          
+
+        - name: Write GCP service‑account key
+          run: |
+            # GitHub masks the secret value in the logs automatically
+            echo "${{ secrets.GCP_SA_KEY }}" > $HOME/gcp-key.json
+            # Export the path for Terraform’s ADC lookup
+            echo "GOOGLE_APPLICATION_CREDENTIALS=$HOME/gcp-key.json" >> $GITHUB_ENV
 
         - name: Cache Terraform plugins & modules
           uses: actions/cache@v4
@@ -51,7 +57,7 @@ jobs:
            terraform plan \
                  -input=false \
                  -no-color \
-                 -var-file="terraform.tfvars" \
+                 -var-file=".terraform.tfvars" \
                  -out=tfplan
         
         - name: Upload Terraform plan artifact
