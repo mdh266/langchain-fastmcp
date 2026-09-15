@@ -1,0 +1,29 @@
+repos:
+  # Ruff linter and formatter for Python
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    # Latest stable release as of Sept 2026
+    rev: v0.15.12
+    hooks:
+      # Lint Python files using Ruff (fails on any lint error)
+      - id: ruff-check
+        # Optional: automatically fix fixable issues on commit
+        args: [--fix]
+        files: \.py$
+      # Auto‑format Python files using Ruff's formatter
+      - id: ruff-format
+        files: \.py$
+
+  # Terraform formatting and validation – ensures .tf files are formatted and syntactically valid
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    # Latest stable release as of Aug 2026
+    rev: v1.109.0
+    hooks:
+      - id: terraform_fmt
+        # Runs `terraform fmt -check -diff` and blocks the commit if formatting differs.
+        files: \.tf$
+      - id: terraform_validate
+        # Runs `terraform validate` (fails on syntax or internal errors). Optional: auto‑retry with cleanup on provider errors.
+        args:
+          - --args=-no-color
+          - --hook-config=--retry-once-with-cleanup=true
+        files: \.tf$
