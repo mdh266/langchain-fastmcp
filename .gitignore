@@ -9,5 +9,10 @@ wheels/
 # Virtual environments
 .venv
 
+# APIs 
 .env
 *.DS_Store
+
+*terraform.tfvars
+*.tfvars
+*.terraform*
