@@ -69,7 +69,6 @@ jobs:
     apply:
         needs: terraform
         runs-on: ubuntu-latest
-        # if github.event_name == 'workflow_dispatch' || github.event_name == 'push'
         defaults:
             run:
                 working-directory: ./terraform
