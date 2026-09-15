@@ -8,6 +8,7 @@ on:
         paths:
         - 'terraform/**'
         - '.github/workflows/terraform.yaml'
+    workflow_dispatch:
 
 jobs:
     terraform:

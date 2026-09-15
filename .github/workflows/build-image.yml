@@ -11,7 +11,7 @@ on:
       - "main"
     paths:
     - mymcp/Dockerfile
-    - mymcp/server.py
+    - mymcp/*.py
     - .github/workflows/build-image.yaml
 
 jobs:

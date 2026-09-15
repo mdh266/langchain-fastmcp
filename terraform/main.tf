@@ -12,6 +12,8 @@ terraform {
 provider "google" {
   project = var.project_id
   region  = var.region
+
+  credentials = file("${path.module}/gcp-key.json")
 }
 
 resource "google_cloud_run_service" "mcp_service" {
