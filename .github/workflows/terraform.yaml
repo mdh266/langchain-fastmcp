@@ -11,64 +11,64 @@ on:
     workflow_dispatch: {}
 
 jobs:
-    # plan:
-    #     runs-on: ubuntu-latest
-    #     defaults:
-    #         run:
-    #             working-directory: ./terraform
-    #     env:
-    #         OPEN_WEATHER_MAP_API_KEY: ${{ secrets.OPEN_WEATHER_MAP_API_KEY }}
-    #         GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}s
+    plan:
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: ./terraform
+        env:
+            OPEN_WEATHER_MAP_API_KEY: ${{ secrets.OPEN_WEATHER_MAP_API_KEY }}
+            GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}s
 
-    #         TF_VAR_project_id:   ${{ secrets.GCP_PROJECT_ID }}   # <-- added (secret)
-    #     steps:
-    #     - name: Checkout repository
-    #       uses: actions/checkout@v3
+            TF_VAR_project_id:   ${{ secrets.GCP_PROJECT_ID }}   # <-- added (secret)
+        steps:
+        - name: Checkout repository
+          uses: actions/checkout@v3
 
-    #     # - name: Cache Terraform plugins & modules
-    #     #   uses: actions/cache@v4
-    #     #   with:
-    #     #     path: |
-    #     #       .terraform
-    #     #       .terraform.lock.hcl
-    #     #     key: ${{ runner.os }}-terraform-${{ hashFiles('terraform/**/*.tf') }}
-    #     #     restore-keys: |
-    #     #        ${{ runner.os }}-terraform-
+        # - name: Cache Terraform plugins & modules
+        #   uses: actions/cache@v4
+        #   with:
+        #     path: |
+        #       .terraform
+        #       .terraform.lock.hcl
+        #     key: ${{ runner.os }}-terraform-${{ hashFiles('terraform/**/*.tf') }}
+        #     restore-keys: |
+        #        ${{ runner.os }}-terraform-
 
 
-    #     - name: Set up Terraform
-    #       uses: hashicorp/setup-terraform@v2
-    #       with:
-    #         terraform_version: 1.15.3
+        - name: Set up Terraform
+          uses: hashicorp/setup-terraform@v2
+          with:
+            terraform_version: 1.15.3
     
-    #     - name: Authenticate to Google Cloud
-    #       uses: google-github-actions/auth@v2
-    #       with:
-    #         credentials_json: ${{ secrets.GCP_SA_KEY }}
+        - name: Authenticate to Google Cloud
+          uses: google-github-actions/auth@v2
+          with:
+            credentials_json: ${{ secrets.GCP_SA_KEY }}
 
-    #     - name: Terraform Init
-    #       run: terraform init -input=false
+        - name: Terraform Init
+          run: terraform init -input=false
     
-    #     - name: Terraform Validate
-    #       run: terraform validate -no-color
+        - name: Terraform Validate
+          run: terraform validate -no-color
 
-    #     - name: Terraform plan
-    #       run: |
-    #        terraform plan \
-    #              -input=false \
-    #              -no-color \
-    #              -var-file="terraform.tfvars" \
-    #              -out=tfplan
+        - name: Terraform plan
+          run: |
+           terraform plan \
+                 -input=false \
+                 -no-color \
+                 -var-file="terraform.tfvars" \
+                 -out=tfplan
         
-    #     - name: Upload Terraform plan artifact
-    #       uses: actions/upload-artifact@v4
-    #       with:
-    #         name: tfplan
-    #         path: terraform/tfplan
-    #         retention-days: 5 
-
+        - name: Upload Terraform plan artifact
+          uses: actions/upload-artifact@v4
+          with:
+            name: tfplan
+            path: terraform/tfplan
+            retention-days: 5 
+            
     apply:
-        needs: terraform
+        needs: plan
         runs-on: ubuntu-latest
         defaults:
             run:
