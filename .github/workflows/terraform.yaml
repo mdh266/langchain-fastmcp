@@ -61,12 +61,14 @@ jobs:
                  -out=tfplan
         
         - name: Terraform Apply
-          run: terraform apply tfplan
+          run: terraform apply -input=false \
+            -no-color \
+            -auto-approve tfplan
         # - name: Upload Terraform plan artifact
         #   uses: actions/upload-artifact@v4
         #   with:
         #     name: tfplan
-        #     path: terraform/tfplan
+        #     path: terraform
         #     retention-days: 5 
             
     # apply:
@@ -104,4 +106,9 @@ jobs:
 
 
     #     - name: Terraform Apply
-    #       run: terraform apply /terraform/tfplan
+    #   - name: Terraform Apply
+    #     run: |
+    #       terraform -chdir=terraform apply \
+    #         -input=false \
+    #         -no-color \
+    #         -auto-approve tfplan
