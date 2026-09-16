@@ -25,15 +25,15 @@ jobs:
         - name: Checkout repository
           uses: actions/checkout@v3
 
-        # - name: Cache Terraform plugins & modules
-        #   uses: actions/cache@v4
-        #   with:
-        #     path: |
-        #       .terraform
-        #       .terraform.lock.hcl
-        #     key: ${{ runner.os }}-terraform-${{ hashFiles('terraform/**/*.tf') }}
-        #     restore-keys: |
-        #        ${{ runner.os }}-terraform-
+        - name: Cache Terraform plugins & modules
+          uses: actions/cache@v4
+          with:
+            path: |
+              .terraform
+              .terraform.lock.hcl
+            key: ${{ runner.os }}-terraform-${{ hashFiles('terraform/**/*.tf') }}
+            restore-keys: |
+               ${{ runner.os }}-terraform-
 
 
         - name: Set up Terraform
@@ -57,7 +57,7 @@ jobs:
            terraform plan \
                  -input=false \
                  -no-color \
-                 -var-file=".terraform.tfvars" \
+                 -var-file="terraform.tfvars" \
                  -out=terraform/tfplan
         
         - name: Upload Terraform plan artifact
