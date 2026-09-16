@@ -60,46 +60,48 @@ jobs:
                  -var-file="terraform.tfvars" \
                  -out=tfplan
         
-        - name: Upload Terraform plan artifact
-          uses: actions/upload-artifact@v4
-          with:
-            name: tfplan
-            path: terraform/tfplan
-            retention-days: 5 
-            
-    apply:
-        needs: plan
-        runs-on: ubuntu-latest
-        defaults:
-            run:
-                working-directory: ./terraform
-        env:
-            OPEN_WEATHER_MAP_API_KEY: ${{ secrets.OPEN_WEATHER_MAP_API_KEY }}
-            GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
-
-            TF_VAR_project_id: ${{ secrets.GOOGLE_PROJECT_ID }}
-        
-        steps:
-        - name: Checkout repository
-          uses: actions/checkout@v4
-
-        - name: Set up Terraform
-          uses: hashicorp/setup-terraform@v3
-          with:
-            terraform_version: 1.15.3
-        
-        - name: Authenticate to Google Cloud
-          uses: google-github-actions/auth@v2
-          with:
-            credentials_json: ${{ secrets.GCP_SA_KEY }}
-
-
-        - name: Download Terraform plan artifact
-          uses: actions/download-artifact@v4
-          with:
-            name: tfplan
-            path: /terraform
-
-
         - name: Terraform Apply
-          run: terraform apply /terraform/tfplan
+          run: terraform apply tfplan
+        # - name: Upload Terraform plan artifact
+        #   uses: actions/upload-artifact@v4
+        #   with:
+        #     name: tfplan
+        #     path: terraform/tfplan
+        #     retention-days: 5 
+            
+    # apply:
+    #     needs: plan
+    #     runs-on: ubuntu-latest
+    #     defaults:
+    #         run:
+    #             working-directory: ./terraform
+    #     env:
+    #         OPEN_WEATHER_MAP_API_KEY: ${{ secrets.OPEN_WEATHER_MAP_API_KEY }}
+    #         GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+
+    #         TF_VAR_project_id: ${{ secrets.GOOGLE_PROJECT_ID }}
+        
+    #     steps:
+    #     - name: Checkout repository
+    #       uses: actions/checkout@v4
+
+    #     - name: Set up Terraform
+    #       uses: hashicorp/setup-terraform@v3
+    #       with:
+    #         terraform_version: 1.15.3
+        
+    #     - name: Authenticate to Google Cloud
+    #       uses: google-github-actions/auth@v2
+    #       with:
+    #         credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+
+    #     - name: Download Terraform plan artifact
+    #       uses: actions/download-artifact@v4
+    #       with:
+    #         name: tfplan
+    #         path: /terraform
+
+
+    #     - name: Terraform Apply
+    #       run: terraform apply /terraform/tfplan
