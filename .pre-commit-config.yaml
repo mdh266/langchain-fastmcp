@@ -21,9 +21,9 @@ repos:
       - id: terraform_fmt
         # Runs `terraform fmt -check -diff` and blocks the commit if formatting differs.
         files: \.tf$
-      # - id: terraform_validate
-      #   # Runs `terraform validate` (fails on syntax or internal errors). Optional: auto‑retry with cleanup on provider errors.
-      #   args:
-      #     - --args=-no-color
-      #     - --hook-config=--retry-once-with-cleanup=true
-      #   files: \.tf$
+      - id: terraform_validate
+        # Runs `terraform validate` (fails on syntax or internal errors). Optional: auto‑retry with cleanup on provider errors.
+        args:
+          - --args=-no-color
+          - --hook-config=--retry-once-with-cleanup=true
+        files: \.tf$
