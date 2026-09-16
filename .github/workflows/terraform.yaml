@@ -61,7 +61,7 @@ jobs:
                  -out=tfplan
         
         - name: Terraform Apply
-          run: terraform apply -input=false \
+          run: terraform apply s\
             -no-color \
             -auto-approve tfplan
         # - name: Upload Terraform plan artifact
