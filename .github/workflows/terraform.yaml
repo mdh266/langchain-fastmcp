@@ -98,4 +98,4 @@ jobs:
 
 
         - name: Terraform Apply
-          run: terraform apply -input=false -no-color -auto-approve tfplan
+          run: terraform apply -no-color -auto-approve tfplan
