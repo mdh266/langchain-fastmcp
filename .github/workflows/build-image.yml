@@ -9,12 +9,14 @@ on:
   push:
     branches:
       - "main"
-
     paths:
     - mymcp/Dockerfile
     - mymcp/*.py
     - .github/workflows/build-image.yaml
+    
+  workflow_dispatch: {}
 
+    
 jobs:
   build-deploy:
     runs-on: ubuntu-latest
