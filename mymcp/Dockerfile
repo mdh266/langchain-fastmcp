@@ -7,9 +7,14 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 # Set working directory
 WORKDIR /app
 
-COPY pyproject.toml ./
+RUN uv venv
 
-RUN uv sync --no-cache
+RUN uv pip install \
+        --no-cache-dir \
+        fastmcp>=3.2.4 \
+        googlemaps>=4.10.0 \
+        redis>=8.1.0 \
+        pymongo==4.17.0
 
 COPY mymcp/server.py mymcp/utils.py ./
 
