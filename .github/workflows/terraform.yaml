@@ -9,7 +9,7 @@ on:
     workflow_dispatch: {}
 
 jobs:
-    plan:
+    plan-apply:
         runs-on: ubuntu-latest
         defaults:
             run:

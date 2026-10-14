@@ -9,8 +9,20 @@ I'll go over how to buid a simple agent, use a [MCP](https://en.wikipedia.org/wi
 Locally running:
 
 ```bash
-docker build -f mymcyp/Dockerfile -t agentsmymcp 
-docker run -ip 8080:8080 -t agentsmymcp
+docker compose build 
+docker compose up 
 ```
+
 ## Part 2
 
+
+Local building of Terraform resources,
+
+```bash
+cd terraform/cloudrun
+terraform init
+terraform fmt        # optional, formats the code
+terraform validate    # sanity‑check
+terraform plan -var-file=terraform.tfvars   # preview
+terraform apply -auto-approve -var-file=terraform.tfvars
+```
