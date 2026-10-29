@@ -221,7 +221,7 @@ def get_precinct_info(precinct_number: int) -> Dict[str, str]:
 
     """
     r = redis.Redis(
-        host=os.getenv("REDIS_URL"),
+        host=os.getenv("REDIS_URL") or os.getenv("REDIS_HOST"),
         port=os.getenv("REDIS_PORT"),
         decode_responses=True,
         username=os.getenv("REDIS_USERNAME"),

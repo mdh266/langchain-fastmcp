@@ -14,7 +14,7 @@ def get_mongo_client() -> MongoClient:
     """
     mongo_username = os.getenv("MONGO_USERNAME")
     mongo_password = os.getenv("MONGO_PASSWORD")
-    mongo_host = os.getenv("MONGO_URL")
+    mongo_host = os.getenv("MONGO_URL") or os.getenv("MONGO_HOST")
 
     # Example URI format used elsewhere in the project:
     #   mongodb+srv://<username>:<password>@<host>
