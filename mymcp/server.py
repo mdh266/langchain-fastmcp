@@ -5,7 +5,6 @@ import urllib.request
 from typing import Any, Dict, Optional
 from fastmcp import FastMCP
 from dotenv import load_dotenv, find_dotenv
-from typing import Dict, Optional
 import googlemaps
 import redis
 from utils import get_mongo_client
@@ -54,7 +53,7 @@ def get_weather(city: str, api_key: Optional[str] = None) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def convert_address_to_point(address: str ) -> Dict[str, float]:
+def convert_address_to_point(address: str) -> Dict[str, float]:
     """
     Convert a street address to a Shapely Point object.
 
@@ -83,8 +82,8 @@ def convert_address_to_point(address: str ) -> Dict[str, float]:
 
 
 @mcp.tool(
-      name="get_police_precinct",
-      description="Resolve a street address to the NYPD precinct number."
+    name="get_police_precinct",
+    description="Resolve a street address to the NYPD precinct number.",
 )
 def get_police_precinct(lat: float, lng: float) -> int | None:
     """
@@ -114,21 +113,21 @@ def get_police_precinct(lat: float, lng: float) -> int | None:
     """
     client = get_mongo_client()
 
-    query = {"geom": { 
-            "$geoIntersects": { 
-                "$geometry": { 
-                "type": "Point", 
-                "coordinates": [ lng, lat]
-                            } 
-                    } 
-            } 
-    } 
+    query = {
+        "geom": {
+            "$geoIntersects": {
+                "$geometry": {"type": "Point", "coordinates": [lng, lat]}
+            }
+        }
+    }
 
-    projection = {"_id":0, "precinct_number":1}
+    projection = {"_id": 0, "precinct_number": 1}
 
-    precinct_info =  (client.get_database("nyc")
-                            .get_collection("precincts")
-                            .find_one(query, projection))
+    precinct_info = (
+        client.get_database("nyc")
+        .get_collection("precincts")
+        .find_one(query, projection)
+    )
 
     return int(precinct_info.get("precinct_number")) if precinct_info else None
 
@@ -137,9 +136,10 @@ def get_police_precinct(lat: float, lng: float) -> int | None:
     name="find_closest_restroom",
     description="Find the closest public restroom to a given latitude and longitude and return all information on it",
     output_schema={  # a free‑form schema – essentially “anything”
-    "type": "object",
-    "additionalProperties": True,
-})
+        "type": "object",
+        "additionalProperties": True,
+    },
+)
 def find_closest_restroom(lat: float, lng: float) -> Dict[str, Any]:
     """
     Find the closest public restroom to the provided latitude and longitude.
@@ -165,10 +165,10 @@ def find_closest_restroom(lat: float, lng: float) -> Dict[str, Any]:
                 "near": {"type": "Point", "coordinates": [lng, lat]},
                 "distanceField": "calculated_distance",
                 "spherical": True,
-                "key": "geom"
+                "key": "geom",
             }
         },
-        {"$limit": 1}
+        {"$limit": 1},
     ]
 
     results = list(collection.aggregate(pipeline))
@@ -198,11 +198,11 @@ def find_closest_restroom(lat: float, lng: float) -> Dict[str, Any]:
             if website_val is not None:
                 values["website"] = website_val
     return values
-    
+
 
 @mcp.tool(
     name="get_precinct_info",
-    description="Return the precinct information for a given precinct number."
+    description="Return the precinct information for a given precinct number.",
 )
 def get_precinct_info(precinct_number: int) -> Dict[str, str]:
     """
@@ -218,14 +218,14 @@ def get_precinct_info(precinct_number: int) -> Dict[str, str]:
     dict
         A dictionary containing the precinct information (e.g. name, address, etc.).
         Returns an empty dictionary if the pre
-  
+
     """
     r = redis.Redis(
-        host=os.getenv("REDIS_HOST"),
-        port=11170,
+        host=os.getenv("REDIS_URL"),
+        port=os.getenv("REDIS_PORT"),
         decode_responses=True,
         username=os.getenv("REDIS_USERNAME"),
-        password=os.getenv("REDIS_PASSWORD")
+        password=os.getenv("REDIS_PASSWORD"),
     )
     try:
         result = r.get(str(precinct_number))
@@ -235,6 +235,7 @@ def get_precinct_info(precinct_number: int) -> Dict[str, str]:
         print(f"Error fetching precinct info for {precinct_number}: {e}")
 
     return {}  # Return an empty dict if no info is found
+
 
 if __name__ == "__main__":
     mcp.run(transport="http", host="0.0.0.0", port=8080)

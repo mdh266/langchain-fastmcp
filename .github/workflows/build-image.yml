@@ -13,7 +13,7 @@ on:
     paths:
     - mymcp/Dockerfile
     - mymcp/*.py
-    - .github/workflows/build-image.yaml
+    - .github/workflows/build-image.yml
 
   workflow_dispatch: {}
 
@@ -51,4 +51,4 @@ jobs:
             --image=${{ env.DOCKER_IMAGE }}:${{ env.TAG }} \
             --region=${{ env.REGION }} \
             --project=${{ secrets.GCP_PROJECT_ID }} \
-            --set-env-vars=OPEN_WEATHER_MAP_API_KEY=${{ secrets.OPEN_WEATHER_MAP_API_KEY }},GOOGLE_API_KEY=${{ secrets.GOOGLE_API_KEY }},REDIS_USERNAME=${{ secrets.REDIS_USERNAME }},REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }},REDIS_URL=${{ secrets.REDIS_URL }},MONGO_USERNAME=${{ secrets.MONGO_USERNAME }},MONGO_PASSWORD=${{ secrets.MONGO_PASSWORD }},MONGO_URL=${{ secrets.MONGO_URL }}
+            --set-env-vars=OPEN_WEATHER_MAP_API_KEY=${{ secrets.OPEN_WEATHER_MAP_API_KEY }},GOOGLE_API_KEY=${{ secrets.GOOGLE_API_KEY }},REDIS_USERNAME=${{ secrets.REDIS_USERNAME }},REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }},REDIS_URL=${{ secrets.REDIS_URL }},REDIS_PORT=${{ secrets.REDIS_PORT }},MONGO_USERNAME=${{ secrets.MONGO_USERNAME }},MONGO_PASSWORD=${{ secrets.MONGO_PASSWORD }},MONGO_URL=${{ secrets.MONGO_URL }}
