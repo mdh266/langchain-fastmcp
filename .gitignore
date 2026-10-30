@@ -16,3 +16,4 @@ wheels/
 *terraform.tfvars
 *.terraform*
 *.tfstate*
+credentials.json
