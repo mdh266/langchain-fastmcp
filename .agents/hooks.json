@@ -1,0 +1,11 @@
+{
+  "langsmith-tracer": {
+    "Stop": [
+      {
+        "type": "command",
+        "command": "uv run python .agents/langsmith_hook.py",
+        "timeout": 20
+      }
+    ]
+  }
+}
